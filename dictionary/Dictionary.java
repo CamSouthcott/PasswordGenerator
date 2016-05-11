@@ -2,82 +2,39 @@ package com.camsouthcott.passwordgenerator.dictionary;
 
 import android.content.Context;
 
-import com.camsouthcott.passwordgenerator.random.RandomPicker;
+import java.io.BufferedReader;
+import java.io.IOException;
 
-import java.util.List;
-
-/**
- * Created by Cam Southcott on 4/18/2016.
- */
 public class Dictionary {
 
-    private List<List<List<Word>>> words;
-    RandomPicker randomPicker;
+	private MyRadixTree radixTree;
+	
+	public Dictionary(Context context){
+		
+		radixTree = new MyRadixTree();
+		
+		try {
+			BufferedReader br = WordSource.getBufferedReader(context);
 
-    public Dictionary(Context context){
-        randomPicker = new RandomPicker();
-        words = new WordSource().getWords(context);
-    }
+			String line;
 
-    public String randWord(char firstLetter, Word.WordType wordType){
+			while((line = br.readLine()) != null){
+				String[] wordArray = line.split(" ");
 
-        List<Word> choices = words.get(getIndex(firstLetter)).get(wordType.ordinal());
+				for(String word: wordArray){
+					try{
+						radixTree.addWord(word);
+					}catch(IllegalArgumentException e){
+						//if the word contains invalid input, just skip it
+					}
+				}
+			}
+		} catch (IOException e) {
 
-        if(choices.size() > 0){
-            Word word = (Word) randomPicker.chooseRand(choices.toArray());
-            return word.toString();
-        }
-
-        return String.valueOf(firstLetter);
-    }
-
-    protected static int getIndex(char c){
-
-        //convert numbers to their equivalent letters
-        switch(c){
-            case '0':
-                c = 'o';
-                break;
-            case '1':
-                c = 'i';
-                break;
-            case '2':
-                c = 'z';
-                break;
-            case '3':
-                c = 'e';
-                break;
-            case '4':
-                c = 'a';
-                break;
-            case '5':
-                c = 's';
-                break;
-            case '6':
-                c = 'g';
-                break;
-            case '7':
-                c = 't';
-                break;
-            case '8':
-                c = 'b';
-                break;
-            case '9':
-                c = 'q';
-                break;
-            default:
-                break;
-        }
-
-        //All letters
-        // Asci table: http://www.w3schools.com/charsets/ref_html_ascii.asp
-        if(c >= 65 && c <=90){
-            return c - 65;
-        }else if(c >= 97 && c <= 122){
-            return c - 97;
-        }
-
-        throw new IllegalArgumentException();
-    }
-
+		}
+	}
+	
+	public String matchCharSequence(String sequence){
+		return radixTree.matchCharSequence(sequence);
+	}
 }

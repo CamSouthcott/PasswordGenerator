@@ -10,12 +10,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.camsouthcott.passwordgenerator.dictionary.Dictionary;
-import com.camsouthcott.passwordgenerator.dictionary.Word;
 import com.camsouthcott.passwordgenerator.random.RandomPicker;
 
 public class MainActivity extends AppCompatActivity {
-
-    private static final Word.WordType[] sentenceStructure = {Word.WordType.adjective, Word.WordType.noun, Word.WordType.verb, Word.WordType.adverb};
 
     private static final String LOWER_CASE_CHARS = "abcdefghijklmnopqrstuvwxyz";
     private static final String UPPER_CASE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -98,14 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String mnemonic(char[] password){
 
-        StringBuilder sb = new StringBuilder();
-
-        for(int i = 0; i < password.length; i++){
-            sb.append(dictionary.randWord(password[i],sentenceStructure[i%sentenceStructure.length]));
-            sb.append(" ");
-        }
-
-        return sb.toString();
+        return dictionary.matchCharSequence(new String(password));
     }
 
     private class DictionaryLoader extends AsyncTask<Void,Void,Void>{
