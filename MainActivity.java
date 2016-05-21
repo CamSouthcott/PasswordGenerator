@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         passwordTextView.setText(password);
 
         if(dictionary != null){
-            new HintAsyncTask().execute(new String(password));
+            new HintAsyncTask().execute(password);
         }
     }
 
@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
 
                 String password = getPassword();
                 if(password != null){
-                    new HintAsyncTask().execute(new String(password));
+                    new HintAsyncTask().execute(password);
                 }
             }
 
