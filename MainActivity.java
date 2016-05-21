@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int PASSWORD_LENGTH_MIN = 4;
     private static final int PASSWORD_MAX_LENGTH = 15;
 
-    private TextView passwordTextView, mnemonicTextView;
+    private TextView passwordTextView, hintTextView;
     private CheckBox uppercaseCheckBox, numbersCheckBox;
     private Spinner passwordLengthSpinner;
     private Dictionary dictionary;
@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         passwordTextView = (TextView) findViewById(R.id.passwordTextView);
-        mnemonicTextView = (TextView) findViewById(R.id.mnemonicTextView);
+        hintTextView = (TextView) findViewById(R.id.hintTextView);
         uppercaseCheckBox = (CheckBox) findViewById(R.id.uppercaseCheckBox);
         numbersCheckBox = (CheckBox) findViewById(R.id.numbersCheckBox);
 
@@ -60,17 +60,29 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
     }
 
-    public void generatePasswordClick(View view){
-        char[] password = generatePassword();
+    private String getPassword(){
+        CharSequence password = passwordTextView.getText();
 
-        passwordTextView.setText(password, 0, password.length);
+        if(password != null){
+            return password.toString();
+        }
+
+        return null;
+    }
+
+    public void generatePasswordClick(View view){
+        String password = new String(generatePassword());
+
+        passwordTextView.setText(password);
 
         if(dictionary != null){
-            mnemonicTextView.setText(mnemonic(password));
+            new HintAsyncTask().execute(new String(password));
         }
     }
 
     public char[] generatePassword() {
+
+        clearTextViews();
 
         StringBuilder charsSB = new StringBuilder();
 
@@ -93,11 +105,6 @@ public class MainActivity extends AppCompatActivity {
         return password;
     }
 
-    private String mnemonic(char[] password){
-
-        return dictionary.matchCharSequence(new String(password));
-    }
-
     private class DictionaryLoader extends AsyncTask<Void,Void,Void>{
 
         Dictionary mDictionary;
@@ -114,9 +121,47 @@ public class MainActivity extends AppCompatActivity {
 
             if(mDictionary != null) {
                 dictionary = mDictionary;
+
+                String password = getPassword();
+                if(password != null){
+                    new HintAsyncTask().execute(new String(password));
+                }
             }
 
         }
+    }
+
+    private class HintAsyncTask extends AsyncTask<String,Void,Void>{
+
+        Dictionary mDictionary;
+        String hint;
+
+        @Override
+        protected void onPreExecute() {
+            mDictionary = dictionary;
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+
+            String password = params[0];
+
+            if(mDictionary!= null) {
+                hint = mDictionary.matchCharSequence(password);
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+
+            if(hint != null) {
+                hintTextView.setText(hint);
+            }
+
+        }
+
     }
 
     public void deletePasswordClick(View view){
@@ -125,6 +170,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void clearTextViews(){
         passwordTextView.setText("");
-        mnemonicTextView.setText("");
+        hintTextView.setText("");
     }
 }
